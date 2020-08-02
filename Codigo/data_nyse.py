@@ -13,14 +13,21 @@ def obtener_opciones_yahoo_finance(ticker = 'GGAL'):
     puts = data.option_chain(vencimientos[0])[1]
 
     for vencimiento in vencimientos[1:]:
-        calls = calls.append(data.option_chain(vencimiento)[0])
-        puts = puts.append(data.option_chain(vencimiento)[1])
+        try:
+            calls = calls.append(data.option_chain(vencimiento)[0])
+        except:
+            pass
+        try:
+            puts = puts.append(data.option_chain(vencimiento)[1])
+        except:
+            pass
 
     panel_opciones = calls.append(puts)
 
+    panel_opciones['Ticker'] = ticker
+
     panel_opciones['Spot'] = (data.info['bid']+data.info['ask'])/2
     
-    panel_opciones['Ticker'] = ticker
     return panel_opciones
 
 
@@ -35,12 +42,20 @@ def obtener_panel_opciones_nyse(ticker='GGAL', clean_flag=False):
 
     panel_opciones = panel_opciones.reset_index()
 
+    len_tick = len(ticker)
+
 
     for idx in list(panel_opciones.index.values):
-        year = 2000 + int(panel_opciones.contractSymbol.values[idx][4:6])
-        month = int(panel_opciones.contractSymbol.values[idx][6:8])
-        day = int(panel_opciones.contractSymbol.values[idx][8:10])
-        callput = panel_opciones.contractSymbol.values[idx][10:11]
+        #year = 2000 + int(panel_opciones.contractSymbol.values[idx][4:6])
+        #month = int(panel_opciones.contractSymbol.values[idx][6:8])
+        #day = int(panel_opciones.contractSymbol.values[idx][8:10])
+        #callput = panel_opciones.contractSymbol.values[idx][10:11]
+
+        year = 2000 + int(panel_opciones.contractSymbol.values[idx][len_tick:len_tick+2])
+        month = int(panel_opciones.contractSymbol.values[idx][len_tick+2:len_tick+4])
+        day = int(panel_opciones.contractSymbol.values[idx][len_tick+4:len_tick+6])
+        callput = panel_opciones.contractSymbol.values[idx][len_tick+6:len_tick+7]
+
 
         hoy = datetime.date.today()
         expiry_datetime = datetime.date(year, month, day)
