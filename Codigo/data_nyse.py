@@ -42,6 +42,7 @@ def obtener_panel_opciones_nyse(ticker='GGAL', clean_flag=False):
 
     panel_opciones = panel_opciones.reset_index()
 
+    #Modificacion
     len_tick = len(ticker)
 
 
