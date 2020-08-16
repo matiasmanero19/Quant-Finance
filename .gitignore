@@ -1,5 +1,6 @@
 library/__pycache__/
 Codigo/__pycache__/
+Notebooks/.ipynb_checkpoints/
 *.py[cod]
 *$py.class
 ~*.*
