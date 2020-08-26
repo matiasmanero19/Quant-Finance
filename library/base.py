@@ -6,6 +6,7 @@ Created on Mon May 25 12:19:45 2020
 """
 
 import pandas as pd
+import datetime
 
 
 class AbstractMarketObject():
@@ -18,13 +19,29 @@ class AbstractMarketObject():
     """   
     def __init__( self , *args, **kwargs ):
         self._time_series_close = kwargs['time_series'] if 'time_series' in kwargs else pd.Series()
+        self._time_series_shifts = pd.Series()
         self.name = kwargs['name']  if 'name' in kwargs else pd.Series()
+        self.days_rolled = datetime.timedelta(0)
     
     def add_close( self, time, close ):
         self._time_series_close[time] = close
         
     def get_close( self, time ):
-        return self._time_series_close.asof(time)
+        rolled_time = time + self.days_rolled
+        close = self._time_series_close.asof(rolled_time)      
+        return close + self._time_series_shifts.asof(rolled_time) if rolled_time in self._time_series_shifts.index.values else close
+    
+    def shift_close( self, time, shift ):
+        self._time_series_shifts[time] = shift
+        
+    def unshift( self ):
+        self._time_series_shifts = pd.Series()
+        
+    def roll( self, days ):
+        self.days_rolled = days
+        
+    def unroll( self ):
+        self.days_rolled = datetime.timedelta(0)
         
     def time_series_between_times( self, t1, t2 ):
         return self._time_series_close[t1:t2]
@@ -41,6 +58,12 @@ class AbstractDerivativeInstrument( AbstractMarketObject ):
     def get_cashflows( self, time ):
         """
         This function returns all the future cashflows of the derivative 
+        """
+        raise Exception('It must be implemented in a subclass')
+        
+    def get_cashflows_shifted( self, time ):
+        """
+        This function returns all the future shifted cashflows of the derivative used for risk calculations
         """
         raise Exception('It must be implemented in a subclass')
     
@@ -74,6 +97,15 @@ class AbstractPricer():
         cashflows = self.option.get_cashflows(time)
         cashflows.calculate_npvs( pricer = self, time = time )
         return cashflows.npv()
+    
+    def npv_shifted( self, time, shift ):
+        """
+        It returns the sum of the shifted npv of all the relevant cashflows from the option for time t.
+        """
+        shifted_cashflows = self.option.get_cashflows_shifted(time, shift)
+        shifted_cashflows.calculate_npvs( pricer = self, time = time )
+        return shifted_cashflows.npv()
+    
     
     def npv_cashflow( self, cashflow, time ):
         """

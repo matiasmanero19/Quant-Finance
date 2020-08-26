@@ -27,8 +27,7 @@ class BlackScholesFormulaPricer( AbstractPricer ):
             raise Exception('underlier_vol not specified')
         
         super().initialize_pricer(parameters)
-
-    
+   
     def npv_cashflow( self, cashflow, time ):
         """
         This is the function that calculates the npv of each cashflow
@@ -51,6 +50,7 @@ class BlackScholesFormulaPricer( AbstractPricer ):
         df = self.zero_curve.df(time, T)
     
         return f * ( norm.cdf(f * d_plus) * S_t - norm.cdf(f * d_minus) * K * df )
+
     
     
         
