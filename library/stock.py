@@ -10,6 +10,9 @@ class Stock( AbstractMarketObject ):
     
     def get_price( self, time ):
         return self.get_close( time )
+    
+    def shift_price(self, time, shift):
+        self.shift_close(time, shift)
         
     def plot( self, t1, t2 ):
         self.time_series_between_times(t1,t2).plot()
